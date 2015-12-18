@@ -1,41 +1,64 @@
-module.exports = {
+window.User = {
 
-    data: window.$data,
+    el: '#user-edit',
 
-    computed: {
+    data: function () {
+        return _.extend({sections: [], form: {}}, window.$data);
+    },
 
-        isNew: function () {
-            return !this.user.access && this.user.status;
-        }
+    created: function () {
 
+        var sections = [];
+
+        _.forIn(this.$options.components, function (component, name) {
+
+            var options = component.options || {};
+
+            if (options.section) {
+                sections.push(_.extend({name: name, priority: 0}, options.section));
+            }
+
+        });
+
+        this.$set('sections', _.sortBy(sections, 'priority'));
+
+    },
+
+    ready: function () {
+        this.tab = UIkit.tab(this.$els.tab, {connect: this.$els.content});
     },
 
     methods: {
 
-        save: function (e) {
-            e.preventDefault();
+        save: function () {
 
-            this.$resource('api/user/:id').save({id: this.user.id}, {user: this.user, password: this.password}, function (data) {
+            var data = {user: this.user};
 
-                if (!this.user.id) {
-                    window.history.replaceState({}, '', this.$url.route('admin/user/edit', {id: data.user.id}))
-                }
+            this.$broadcast('save', data);
 
-                this.$set('user', data.user);
+            this.$resource('api/user/:id').save({id: this.user.id}, data).then(function (res) {
+                        if (!this.user.id) {
+                            window.history.replaceState({}, '', this.$url.route('admin/user/edit', {id: res.data.user.id}))
+                        }
 
-                this.$notify('User saved.');
+                        this.$set('user', res.data.user);
 
-            }).error(function (data) {
-                this.$notify(data, 'danger');
-            });
+                        this.$notify('User saved.');
+                    }, function (res) {
+                        this.$notify(res.data, 'danger');
+                    }
+                );
+
         }
+
+    },
+
+    components: {
+
+        settings: require('../../components/user-settings.vue')
 
     }
 
 };
 
-$(function () {
-
-    new Vue(module.exports).$mount('#user-edit');
-
-});
+Vue.ready(window.User);

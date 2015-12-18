@@ -1,6 +1,6 @@
 <?php $view->script('marketplace', 'installer:app/bundle/marketplace.js', 'vue') ?>
 
-<div id="marketplace">
+<div id="marketplace" v-cloak data-uk-observe>
 
     <div class="uk-margin uk-flex uk-flex-space-between uk-flex-wrap" data-uk-margin>
         <div class="uk-flex uk-flex-middle uk-flex-wrap" data-uk-margin>
@@ -14,11 +14,8 @@
             </div>
 
         </div>
-        <div data-uk-margin>
-
-        </div>
     </div>
 
-    <marketplace api="{{ api }}" search="{{ search }}" type="{{ type }}" installed="{{ installed }}"></marketplace>
+    <marketplace :api="api" :search="search" :type="type" :installed="installed"></marketplace>
 
 </div>

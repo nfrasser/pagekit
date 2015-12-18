@@ -27,11 +27,11 @@ class UserApiController
             $query->where(['status' => (int) $status]);
 
             if ($status) {
-                $query->where('access IS NOT NULL');
+                $query->where('login IS NOT NULL');
             }
 
         } elseif ('new' == $status) {
-            $query->where(['status' => User::STATUS_ACTIVE, 'access IS NULL']);
+            $query->where(['status' => User::STATUS_ACTIVE, 'login IS NULL']);
         }
 
         if ($search) {
@@ -45,7 +45,12 @@ class UserApiController
         }
 
         if ($access) {
-            $query->where('access > ?', [date('Y-m-d H:i:s', time() - max(0, (int) $access))]);
+            $query->whereExists(function($query) use ($access) {
+                $query
+                    ->select('id')->from('@system_auth as a')
+                    ->where('a.user_id = @system_user.id')
+                    ->where(['a.access > :access', 'a.status > :status'], ['access' => date('Y-m-d H:i:s', time() - max(0, (int) $access)), 'status' => 0]);
+            });
         }
 
         if (preg_match('/^(username|name|email|registered|login)\s(asc|desc)$/i', $order, $match)) {
@@ -78,11 +83,11 @@ class UserApiController
             $query->where(['status' => (int) $status]);
 
             if ($status) {
-                $query->where('access IS NOT NULL');
+                $query->where('login IS NOT NULL');
             }
 
         } elseif ('new' == $status) {
-            $query->where(['status' => User::STATUS_ACTIVE, 'access IS NULL']);
+            $query->where(['status' => User::STATUS_ACTIVE, 'login IS NULL']);
         }
 
         if ($search) {
@@ -96,7 +101,12 @@ class UserApiController
         }
 
         if ($access) {
-            $query->where('access > ?', [date('Y-m-d H:i:s', time() - max(0, (int) $access))]);
+            $query->whereExists(function($query) use ($access) {
+                $query
+                    ->select('id')->from('@system_auth as a')
+                    ->where('a.user_id = @system_user.id')
+                    ->where(['a.access > :access', 'a.status > :status'], ['access' => date('Y-m-d H:i:s', time() - max(0, (int) $access)), 'status' => 0]);
+            });
         }
 
         $count = $query->count();
@@ -169,7 +179,7 @@ class UserApiController
                 App::abort(403, 'Cannot add/remove Admin Role.');
             }
 
-            unset($data['access'], $data['login'], $data['registered']);
+            unset($data['login'], $data['registered']);
 
             $user->validate();
             $user->save($data);

@@ -13,18 +13,12 @@ return [
             return (new PackageFactory())->addPath($app['path'].'/packages/*/*/composer.json');
         };
 
-        $app['module']->addLoader(function ($module) use ($app) {
+        $app->extend('assets', function ($factory) use ($app) {
 
-            if ($module['type'] == 'extension') {
-                $app['locator']->add("{$module['name']}:", $module['path']);
-                $app['locator']->add("views:{$module['name']}", "{$module['path']}/views");
-            }
+            $factory->setVersion($app['version']);
 
-            if ($module['type'] == 'theme') {
-                $module['data'] = $app->config('theme')->get($module['name'], []);
-            }
+            return $factory;
 
-            return $module;
         });
 
         if ($this->config['enabled']) {
@@ -35,13 +29,13 @@ return [
                 'controller' => 'Pagekit\Installer\Controller\InstallerController'
             ]);
 
-            $app->on('request', function ($event) use ($app) {
+            $app->on('request', function ($event, $request) use ($app) {
 
+                $locale = $request->get('locale') ?: $app['request']->getPreferredLanguage();
                 $available = $app->module('system/intl')->getAvailableLanguages();
-                $preferred = $app['request']->getPreferredLanguage();
 
-                if (isset($available[$preferred])) {
-                    $app->module('system/intl')->setLocale($preferred);
+                if (isset($available[$locale])) {
+                    $app->module('system/intl')->setLocale($locale);
                 }
 
             });

@@ -2,13 +2,15 @@ function install (Vue) {
 
     var config = window.$pagekit;
 
+    Vue.config.debug = false;
+
     /**
      * Libraries
      */
 
+    require('vue-form');
     require('vue-intl');
     require('vue-resource');
-    require('vue-validator');
     require('./lib/asset')(Vue);
     require('./lib/notify')(Vue);
     require('./lib/trans')(Vue);
@@ -25,7 +27,6 @@ function install (Vue) {
 
     require('./components/input-date.vue');
     require('./components/input-image.vue');
-    
     require('./components/input-image-meta.vue');
     require('./components/input-video.vue');
 
@@ -34,7 +35,6 @@ function install (Vue) {
      */
 
     Vue.directive('check-all', require('./directives/check-all'));
-    Vue.directive('checkbox', require('./directives/checkbox'));
     Vue.directive('confirm', require('./directives/confirm'));
     Vue.directive('gravatar', require('./directives/gravatar'));
     Vue.directive('order', require('./directives/order'));
@@ -69,6 +69,34 @@ function install (Vue) {
     Vue.url.current = Vue.url.parse(window.location.href);
 
     Vue.prototype.$session = window.sessionStorage || {};
+    Vue.prototype.$cache = require('lscache');
+
+    Vue.ready = function (fn) {
+
+        if (Vue.util.isObject(fn)) {
+
+            var options = fn;
+
+            fn = function () {
+                new Vue(options);
+            };
+
+        }
+
+        var handle = function () {
+            document.removeEventListener('DOMContentLoaded', handle);
+            window.removeEventListener('load', handle);
+            fn();
+        };
+
+        if (document.readyState === 'complete') {
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', handle);
+            window.addEventListener('load', handle);
+        }
+
+    };
 }
 
 if (window.Vue) {

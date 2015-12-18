@@ -1,32 +1,62 @@
-window.Site = module.exports = {
+window.Site = {
+
+    el: '#site-edit',
 
     data: function () {
+<<<<<<< HEAD
         return _.merge({form: {}}, window.$data);
+=======
+        return _.merge({sections: [], form: {}}, window.$data);
+>>>>>>> develop
     },
 
-    ready: function () {
-        this.Nodes = this.$resource('api/site/node/:id');
-        this.tab = UIkit.tab(this.$$.tab, {connect: this.$$.content});
-    },
+    created: function () {
 
-    computed: {
+        var sections = [], type = _.kebabCase(this.type.id), active;
 
-        sections: function () {
+        _.forIn(this.$options.components, function (component, name) {
 
+            var options = component.options || {};
+
+<<<<<<< HEAD
             var sections = [];
+=======
+            if (options.section) {
+                sections.push(_.extend({name: name, priority: 0}, options.section));
+            }
+>>>>>>> develop
 
-            _.forIn(this.$options.components, function (component, name) {
+        });
 
+<<<<<<< HEAD
                 var options = component.options || {};
 
                 if (options.section) {
                     sections.push(_.extend({name: name, priority: 0}, options.section));
                 }
+=======
+        sections = _.sortBy(sections.filter(function (section) {
 
-            });
+            active = section.name.match('(.+):(.+)');
+>>>>>>> develop
 
-            return sections;
-        },
+            if (active === null) {
+                return !_.find(sections, {name: type + ':' + section.name});
+            }
+
+            return active[1] == type;
+        }, this), 'priority');
+
+        this.$set('sections', sections);
+
+    },
+
+    ready: function () {
+        this.Nodes = this.$resource('api/site/node/:id');
+        this.tab = UIkit.tab(this.$els.tab, {connect: this.$els.content});
+    },
+
+    computed: {
 
         path: function () {
             return (this.node.path ? this.node.path.split('/').slice(0, -1).join('/') : '') + '/' + (this.node.slug || '');
@@ -36,27 +66,31 @@ window.Site = module.exports = {
 
     methods: {
 
+<<<<<<< HEAD
         save: function (e) {
             e.preventDefault();
 
+=======
+        save: function () {
+>>>>>>> develop
             var data = {node: this.node};
 
             this.$broadcast('save', data);
 
-            this.Nodes.save({id: this.node.id}, data, function (data) {
+            this.Nodes.save({id: this.node.id}, data).then(function (res) {
+                        var data = res.data;
+                        if (!this.node.id) {
+                            window.history.replaceState({}, '', this.$url.route('admin/site/page/edit', {id: data.node.id}));
+                        }
 
-                if (!this.node.id) {
-                    window.history.replaceState({}, '', this.$url.route('admin/site/page/edit', {id: data.node.id}));
-                }
+                        this.$set('node', data.node);
 
-                this.$set('node', data.node);
+                        this.$notify(this.$trans('%type% saved.', {type: this.type.label}));
 
-                this.$notify(this.$trans('%type% saved.', {type: this.type.label}));
-
-            }, function (data) {
-
-                this.$notify(data, 'danger');
-            });
+                    }, function (res) {
+                        this.$notify(res.data, 'danger');
+                    }
+                );
         }
 
     },
@@ -96,8 +130,4 @@ window.Site = module.exports = {
 
 };
 
-jQuery(function () {
-
-    (new Vue(module.exports)).$mount('#site-edit');
-
-});
+Vue.ready(window.Site);

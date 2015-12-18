@@ -1,12 +1,66 @@
 module.exports = {
 
+    el: '#widget-edit',
+
+    mixins: [window.Widgets],
+
     data: function () {
+<<<<<<< HEAD
         return _.merge({form: {}}, window.$data);
+=======
+        return _.merge({form: {}, sections: []}, window.$data);
+>>>>>>> develop
+    },
+
+    created: function () {
+
+        var sections = [], type = _.kebabCase(this.widget.type), active;
+
+<<<<<<< HEAD
+        // set position from get param
+        if (!this.widget.id) {
+            var match = new RegExp('[?&]position=([^&]*)').exec(location.search);
+            this.widget.position = (match && decodeURIComponent(match[1].replace(/\+/g, ' '))) || '';
+        }
+    },
+=======
+        _.forIn(this.$options.components, function (component, name) {
+>>>>>>> develop
+
+            var options = component.options || {};
+
+            if (options.section) {
+                sections.push(_.extend({name: name, priority: 0}, options.section));
+            }
+
+        });
+
+        sections = _.sortBy(sections.filter(function (section) {
+
+<<<<<<< HEAD
+                var options = component.options || {};
+
+                if (options.section) {
+                    sections.push(_.extend({name: name, priority: 0}, options.section));
+                }
+=======
+            active = section.name.match('(.+):(.+)');
+
+            if (active === null) {
+                return !_.find(sections, {name: type + ':' + section.name});
+            }
+>>>>>>> develop
+
+            return active[1] == type;
+        }, this), 'priority');
+
+        this.$set('sections', sections);
+
     },
 
     ready: function () {
 
-        UIkit.tab(this.$$.tab, {connect: this.$$.content});
+        UIkit.tab(this.$els.tab, {connect: this.$els.content});
         // this.$set('widget.data', _.defaults({}, this.widget.data, this.type.defaults));
 
         // set position from get param
@@ -14,42 +68,17 @@ module.exports = {
             var match = new RegExp('[?&]position=([^&]*)').exec(location.search);
             this.widget.position = (match && decodeURIComponent(match[1].replace(/\+/g, ' '))) || '';
         }
-    },
-
-    computed: {
-
-        sections: function () {
-
-            var sections = [];
-
-            _.forIn(this.$options.components, function (component, name) {
-
-                var options = component.options || {};
-
-                if (options.section) {
-                    sections.push(_.extend({name: name, priority: 0}, options.section));
-                }
-
-            });
-
-            return sections;
-        },
-
-        positionOptions: function () {
-            return _.map(this.config.positions, function (position) {
-                return {text: this.$trans(position.label), value: position.name};
-            }, this);
-        }
 
     },
 
     methods: {
 
-        save: function (e) {
-            e.preventDefault();
-
+        save: function () {
             this.$broadcast('save', {widget: this.widget});
-            this.$resource('api/site/widget/:id').save({id: this.widget.id}, {widget: this.widget}, function (data) {
+            this.$resource('api/site/widget/:id').save({id: this.widget.id}, {widget: this.widget}).then(function (res) {
+
+                var data = res.data;
+
                 this.$dispatch('saved');
 
                 if (!this.widget.id) {
@@ -59,17 +88,16 @@ module.exports = {
                 this.$set('widget', data.widget);
 
                 this.$notify('Widget saved.');
-            }, function (data) {
-                this.$notify(data, 'danger');
+            }, function (res) {
+                this.$notify(res.data, 'danger');
             });
         },
 
-        cancel: function (e) {
-            e.preventDefault();
-
+        cancel: function () {
             this.$dispatch('cancel');
         }
 
+<<<<<<< HEAD
     },
 
     filters: {
@@ -93,11 +121,10 @@ module.exports = {
     },
 
     mixins: [window.Widgets]
+=======
+    }
+>>>>>>> develop
 
 };
 
-jQuery(function () {
-
-    (new Vue(module.exports)).$mount('#widget-edit');
-
-});
+Vue.ready(module.exports);

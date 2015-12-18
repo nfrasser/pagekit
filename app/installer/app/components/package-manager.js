@@ -1,24 +1,21 @@
 module.exports = {
 
+    mixins: [
+        require('../lib/package')
+    ],
+
     data: function () {
-        return _.extend(window.$data, {
+        return _.extend({
             package: {},
             view: false,
             updates: null,
             search: '',
             status: ''
-        });
+        }, window.$data);
     },
 
     ready: function () {
         this.load();
-    },
-
-    components: {
-
-        'package-details': require('./package-details.vue'),
-        'package-upload': require('./package-upload.vue')
-
     },
 
     methods: {
@@ -26,7 +23,8 @@ module.exports = {
         load: function () {
             this.$set('status', 'loading');
 
-            this.queryUpdates(this.packages, function (data) {
+            this.queryUpdates(this.packages, function (res) {
+                var data = res.data;
                 this.$set('updates', data.packages.length ? _.indexBy(data.packages, 'name') : null);
                 this.$set('status', '');
             }).error(function () {
@@ -56,7 +54,7 @@ module.exports = {
 
         details: function (pkg) {
             this.$set('package', pkg);
-            this.$.details.open();
+            this.$refs.details.open();
         },
 
         settings: function (pkg) {
@@ -81,7 +79,7 @@ module.exports = {
 
                 this.$set('package', pkg);
                 this.$set('view', view);
-                this.$.settings.open();
+                this.$refs.settings.open();
 
             } else {
                 window.location = pkg.settings;
@@ -113,8 +111,10 @@ module.exports = {
 
     },
 
-    mixins: [
-        require('../lib/package')
-    ]
+    components: {
+
+        'package-upload': require('./package-upload.vue')
+
+    }
 
 };

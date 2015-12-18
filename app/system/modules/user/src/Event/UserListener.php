@@ -18,6 +18,7 @@ class UserListener implements EventSubscriberInterface
     }
 
     /**
+<<<<<<< HEAD
      * Updates user's last access time
      */
     public function onUserAccess()
@@ -36,17 +37,14 @@ class UserListener implements EventSubscriberInterface
     }
 
     /**
+=======
+>>>>>>> develop
      * {@inheritdoc}
      */
     public function subscribe()
     {
         return [
-            'auth.login' => 'onUserLogin',
-            'terminate' => 'onUserAccess',
-            'model.role.saved' => 'onUserChange',
-            'model.role.deleted' => 'onUserChange',
-            'model.user.saved' => 'onUserChange',
-            'model.user.deleted' => 'onUserChange'
+            'auth.login' => 'onUserLogin'
         ];
     }
 }

@@ -23,12 +23,12 @@ class UserController
         return [
             '$view' => [
                 'title' => __('Users'),
-                'name' => 'system/user:views/admin/user-index.php'
+                'name' => 'system/user/admin/user-index.php'
             ],
             '$data' => [
-                'statuses' => User::getStatuses(),
-                'roles' => array_values($roles),
                 'config' => [
+                    'statuses' => User::getStatuses(),
+                    'roles' => array_values($roles),
                     'emailVerification' => App::module('system/user')->config('require_verification'),
                     'filter' => $filter,
                     'page' => $page
@@ -54,13 +54,13 @@ class UserController
         return [
             '$view' => [
                 'title' => $id ? __('Edit User') : __('Add User'),
-                'name' => 'system/user:views/admin/user-edit.php'
+                'name' => 'system/user/admin/user-edit.php'
             ],
             '$data' => [
                 'user' => $user,
-                'statuses' => User::getStatuses(),
-                'roles' => array_values($this->getRoles($user)),
                 'config' => [
+                    'statuses' => User::getStatuses(),
+                    'roles' => array_values($this->getRoles($user)),
                     'emailVerification' => App::module('system/user')->config('require_verification'),
                     'currentUser' => App::user()->id
                 ]
@@ -76,7 +76,7 @@ class UserController
         return [
             '$view' => [
                 'title' => __('Permissions'),
-                'name' => 'system/user:views/admin/permission-index.php'
+                'name' => 'system/user/admin/permission-index.php'
             ],
             '$data' => [
                 'permissions' => App::module('system/user')->getPermissions(),
@@ -94,7 +94,7 @@ class UserController
         return [
             '$view' => [
                 'title' => __('Roles'),
-                'name' => 'system/user:views/admin/role-index.php'
+                'name' => 'system/user/admin/role-index.php'
             ],
             '$config' => [
                 'role' => $id
@@ -114,7 +114,7 @@ class UserController
         return [
             '$view' => [
                 'title' => __('User Settings'),
-                'name' => 'system/user:views/admin/settings.php'
+                'name' => 'system/user/admin/settings.php'
             ],
             '$data' => [
                 'config' => App::module('system/user')->config()

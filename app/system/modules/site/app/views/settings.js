@@ -1,12 +1,20 @@
-window.Site = module.exports = {
+window.Site = {
+
+<<<<<<< HEAD
+    data: function () {
+        return _.merge({form: {}}, window.$data);
+    },
+=======
+    el: '#settings',
+>>>>>>> develop
 
     data: function () {
         return _.merge({form: {}}, window.$data);
     },
 
-    ready: function() {
+    ready: function () {
 
-        UIkit.tab(this.$$.tab, {connect: this.$$.content});
+        UIkit.tab(this.$els.tab, {connect: this.$els.content});
 
     },
 
@@ -14,7 +22,7 @@ window.Site = module.exports = {
 
         sections: function () {
 
-            var sections = [];
+            var sections = [], hash = window.location.hash.replace('#', '');
 
             _.forIn(this.$options.components, function (component, name) {
 
@@ -22,6 +30,7 @@ window.Site = module.exports = {
 
                 if (section) {
                     section.name = name;
+                    section.active = name == hash;
                     sections.push(section);
                 }
 
@@ -34,17 +43,14 @@ window.Site = module.exports = {
 
     methods: {
 
-        save: function(e) {
-            e.preventDefault();
-
+        save: function () {
             this.$broadcast('save', this.config);
 
-            this.$http.post('admin/system/settings/config', { name: 'system/site', config: this.config }, function() {
-                 this.$notify('Settings saved.');
-            }).error(function(data) {
-                 this.$notify(data, 'danger');
-            });
-
+            this.$http.post('admin/system/settings/config', {name: 'system/site', config: this.config}).then(function () {
+                        this.$notify('Settings saved.');
+                    }, function (res) {
+                        this.$notify(res.data, 'danger');
+                    });
         }
 
     },
@@ -59,8 +65,4 @@ window.Site = module.exports = {
 
 };
 
-$(function () {
-
-    new Vue(module.exports).$mount('#settings');
-
-});
+Vue.ready(window.Site);

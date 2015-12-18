@@ -24,37 +24,39 @@ class BuildCommand extends Command
      * @var string[]
      */
     protected $excludes = [
-       '^(packages|tmp|config\.php|pagekit.+\.zip|pagekit.db)',
-       '^app\/assets\/[^\/]+\/(dist\/vue-.+\.js|dist\/jquery\.js|lodash\.js)',
-       '^app\/assets\/(jquery|vue)\/(src|perf)',
-       '^app\/vendor\/lusitanian\/oauth\/examples',
-       '^app\/vendor\/maximebf\/debugbar\/src\/DebugBar\/Resources',
-       '^app\/vendor\/nickic\/php-parser\/(grammar|test_old)',
-       '^app\/vendor\/(phpdocumentor|phpspec|phpunit|sebastian|symfony\/yaml)',
-       '^app\/vendor\/[^\/]+\/[^\/]+\/(build|docs?|tests?|changelog|phpunit|upgrade?)',
-       'node_modules'
-   ];
+        '^(packages|tmp|config\.php|pagekit.+\.zip|pagekit.db)',
+        '^app\/assets\/[^\/]+\/(dist\/vue-.+\.js|dist\/jquery\.js|lodash\.js)',
+        '^app\/assets\/(jquery|vue)\/(src|perf)',
+        '^app\/vendor\/lusitanian\/oauth\/examples',
+        '^app\/vendor\/maximebf\/debugbar\/src\/DebugBar\/Resources',
+        '^app\/vendor\/nickic\/php-parser\/(grammar|test_old)',
+        '^app\/vendor\/(phpdocumentor|phpspec|phpunit|sebastian|symfony\/yaml)',
+        '^app\/vendor\/[^\/]+\/[^\/]+\/(build|docs?|tests?|changelog|phpunit|upgrade?)',
+        'node_modules'
+    ];
 
     /**
      * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $path   = $this->container->path();
-        $vers   = $this->container->version();
+        $path = $this->container->path();
+        $vers = $this->container->version();
         $filter = '/'.implode('|', $this->excludes).'/i';
 
         $this->line(sprintf('Starting: webpack'));
 
         exec('webpack -p');
 
-        $finder = Finder::create()->files()->in($path)->ignoreVCS(true)->filter(function ($file) use($filter) {
+        $this->line(sprintf('Building Package.'));
+
+        $finder = Finder::create()->files()->in($path)->ignoreVCS(true)->filter(function ($file) use ($filter) {
             return !preg_match($filter, $file->getRelativePathname());
         });
 
         $zip = new \ZipArchive;
 
-        if (!$zip->open($zipFile = "{$path}/pagekit-".$vers.".zip", \ZipArchive::OVERWRITE)) {
+        if (true !== $zip->open($zipFile = "{$path}/pagekit-{$vers}.zip", \ZipArchive::CREATE | \ZipArchive::OVERWRITE)) {
             $this->abort("Can't open ZIP extension in '{$zipFile}'");
         }
 
@@ -71,13 +73,12 @@ class BuildCommand extends Command
         $zip->addEmptyDir('tmp/logs');
         $zip->addEmptyDir('tmp/sessions');
         $zip->addEmptyDir('tmp/packages');
-        $zip->addEmptyDir('app/database');
 
         $zip->close();
 
         $name = basename($zipFile);
         $size = filesize($zipFile) / 1024 / 1024;
 
-        $this->line(sprintf('Building: %s (%.2f MB)', $name, $size));
+        $this->line(sprintf('Build: %s (%.2f MB)', $name, $size));
     }
 }

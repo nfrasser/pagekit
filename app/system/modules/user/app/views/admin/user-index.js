@@ -1,5 +1,7 @@
 module.exports = {
 
+    el: '#users',
+
     data: function () {
         return _.merge({
             users: false,
@@ -12,7 +14,7 @@ module.exports = {
     created: function () {
 
         this.resource = this.$resource('api/user/:id');
-        this.config.filter = _.extend({search: '', status: '', role: '', order: 'name asc'}, this.config.filter);
+        this.config.filter = _.extend({order: 'name asc'}, this.config.filter);
 
     },
 
@@ -33,7 +35,7 @@ module.exports = {
 
         statuses: function () {
 
-            var options = [{text: this.$trans('New'), value: 'new'}].concat(_.map(this.$data.statuses, function (status, id) {
+            var options = [{text: this.$trans('New'), value: 'new'}].concat(_.map(this.config.statuses, function (status, id) {
                 return {text: status, value: id};
             }));
 
@@ -42,7 +44,7 @@ module.exports = {
 
         roles: function () {
 
-            var options = this.$data.roles.map(function (role) {
+            var options = this.config.roles.map(function (role) {
                 return {text: role.name, value: role.id};
             });
 
@@ -58,9 +60,12 @@ module.exports = {
         },
 
         save: function (user) {
-            this.resource.save({id: user.id}, {user: user}, function (data) {
+            this.resource.save({id: user.id}, {user: user}).then(function () {
                 this.load();
                 this.$notify('User saved.');
+            }, function (res) {
+                this.load();
+                this.$notify(res.data, 'danger');
             });
         },
 
@@ -72,16 +77,22 @@ module.exports = {
                 user.status = status;
             });
 
-            this.resource.save({id: 'bulk'}, {users: users}, function (data) {
+            this.resource.save({id: 'bulk'}, {users: users}).then(function () {
                 this.load();
                 this.$notify('Users saved.');
+            }, function (res) {
+                this.load();
+                this.$notify(res.data, 'danger');
             });
         },
 
         remove: function () {
-            this.resource.delete({id: 'bulk'}, {ids: this.selected}, function (data) {
+            this.resource.delete({id: 'bulk'}, {ids: this.selected}).then(function () {
                 this.load();
                 this.$notify('Users deleted.');
+            }, function (res) {
+                this.load();
+                this.$notify(res.data, 'danger');
             });
         },
 
@@ -96,7 +107,7 @@ module.exports = {
 
         showRoles: function (user) {
             return _.reduce(user.roles, function (roles, id) {
-                var role = _.find(this.$data.roles, 'id', id);
+                var role = _.find(this.config.roles, 'id', id);
                 if (id !== 2 && role) {
                     roles.push(role.name);
                 }
@@ -108,12 +119,16 @@ module.exports = {
 
             page = page !== undefined ? page : this.config.page;
 
-            this.resource.query({filter: this.config.filter, page: page}, function (data) {
+            this.resource.query({filter: this.config.filter, page: page}).then( function (res) {
+                var data = res.data;
+
                 this.$set('users', data.users);
                 this.$set('pages', data.pages);
                 this.$set('count', data.count);
                 this.$set('config.page', page);
                 this.$set('selected', []);
+            }, function () {
+                this.$notify('Loading failed.', 'danger');
             });
         },
 
@@ -127,6 +142,4 @@ module.exports = {
 
 };
 
-$(function () {
-    new Vue(module.exports).$mount('#users');
-});
+Vue.ready(module.exports);

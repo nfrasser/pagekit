@@ -6,7 +6,11 @@
             <div class="uk-form-row">
                 <label for="form-title" class="uk-form-label">{{ 'Title' | trans }}</label>
                 <div class="uk-form-controls">
+<<<<<<< HEAD
                     <input id="form-title" class="uk-form-width-large" type="text" name="title" v-model="widget.title" v-valid="required">
+=======
+                    <input id="form-title" class="uk-form-width-large" type="text" name="title" v-model="widget.title" v-validate:required>
+>>>>>>> develop
                     <p class="uk-form-help-block uk-text-danger" v-show="form.title.invalid">{{ 'Title cannot be blank.' | trans }}</p>
                 </div>
             </div>
@@ -29,9 +33,17 @@
             label: 'Settings'
         },
 
+<<<<<<< HEAD
         inherit: true,
 
         props: ['widget']
+=======
+        props: ['widget', 'form'],
+
+        created: function () {
+            this.$options.partials = this.$parent.$options.partials;
+        }
+>>>>>>> develop
 
     }
 

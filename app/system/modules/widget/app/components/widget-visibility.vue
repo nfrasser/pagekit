@@ -4,12 +4,10 @@
 
         <div class="uk-form-row">
             <span class="uk-form-label">Pages</span>
-            <div class="uk-form-controls uk-form-controls-text">
-                <p><strong>{{ all ? 'All Pages' : 'Only selected pages' | trans }}</strong></p>
-                <ul class="uk-list uk-margin-top-remove" v-repeat="menu: menus" v-show="menu.getNodes().length">
-                    <li class="pk-list-header">{{ menu.label }}</li>
-                    <node v-repeat="node: menu.getNodes()"></node>
-                </ul>
+            <div class="uk-form-controls uk-form-controls-text" v-if="config.menus">
+
+                <input-tree :active.sync="widget.nodes"></input-tree>
+
             </div>
         </div>
 
@@ -26,6 +24,7 @@
             priority: 100
         },
 
+<<<<<<< HEAD
         inherit: true,
 
         props: ['widget'],
@@ -46,36 +45,15 @@
 
                 });
             }));
+=======
+        data: function () {
+          return {
+              menus: false
+          }
+>>>>>>> develop
         },
 
-        computed: {
-
-            all: function () {
-                return !this.widget.nodes || !this.widget.nodes.length;
-            }
-
-        },
-
-        components: {
-
-            node: {
-
-                inherit: true,
-
-                template:
-                        '<li>'+
-                            '<label>' +
-                                '<input type="checkbox" value="{{ node.id }}" v-checkbox="widget.nodes" number>' +
-                                ' {{ node.title }}' +
-                            '</label>' +
-                            '<ul class="uk-list" v-if="menu.getNodes(node)">' +
-                                '<node v-repeat="node: menu.getNodes(node)"></node>' +
-                            '</ul>'+
-                        '<li>'
-
-            }
-
-        }
+        props: ['widget', 'config', 'form']
 
     }
 
